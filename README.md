@@ -168,6 +168,8 @@ The plugin reads your OAuth token from Claude Code's credential store at `~/.cla
 
 The launcher resolves `python3`, `python`, and Windows `py -3`, and the script forces UTF-8 output encoding to handle Unicode gauge characters on Windows.
 
+GitHub Actions now runs smoke tests on Windows, macOS, and Linux for every push.
+
 ---
 
 ## Customization
