@@ -5,7 +5,8 @@ Claude Code statusline with 5h/7d quota tracking.
 Shows: model, context gauge, tokens, git branch, 5h remaining%, 7d remaining%,
 pace indicator, and reset countdown.
 
-Designed for Windows (Git Bash). Caches API responses to /tmp for 5 minutes.
+Designed for Claude Code on Windows, macOS, and Linux. Caches API responses to
+the system temp directory for 5 minutes.
 """
 
 import json
@@ -109,8 +110,14 @@ except (KeyError, TypeError):
 
 # ── Git branch ──────────────────────────────────────────────────
 branch = ""
-FALLBACK_REPO = os.path.expanduser("~/Desktop/ai-dev-team")
-for try_dir in [proj_dir, FALLBACK_REPO]:
+cwd = os.getcwd()
+candidate_dirs = []
+if proj_dir:
+    candidate_dirs.append(proj_dir)
+if cwd and cwd not in candidate_dirs:
+    candidate_dirs.append(cwd)
+
+for try_dir in candidate_dirs:
     if not try_dir:
         continue
     try:
