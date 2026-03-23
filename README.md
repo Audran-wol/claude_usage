@@ -4,6 +4,8 @@ A real-time statusline plugin for [Claude Code](https://docs.anthropic.com/en/do
 
 Never get surprised by rate limits again.
 
+No extra API key setup. No Python packages to install. It uses your existing Claude Code OAuth session.
+
 ---
 
 ## Showcase
@@ -63,8 +65,9 @@ Never get surprised by rate limits again.
 ### Prerequisites
 
 - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) with an active subscription
-- Python 3.10+
-- Git Bash (Windows) or any Unix shell (macOS/Linux)
+- Python 3.10+ available as `python3`, `python`, or `py -3` (Windows)
+- Windows: Git Bash (recommended)
+- macOS / Linux: bash or zsh with `bash` available
 
 ### Setup
 
@@ -77,7 +80,21 @@ cd claude-usage-monitor
 
 **2. Add to Claude Code settings**
 
-Open `~/.claude/settings.json` and add (or update) the `statusLine` block:
+Open `~/.claude/settings.json` and add the right `statusLine.command` for your OS.
+
+**Windows (recommended)**
+
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "C:\\path\\to\\claude-usage-monitor\\statusline.cmd",
+    "padding": 0
+  }
+}
+```
+
+**macOS / Linux**
 
 ```json
 {
@@ -89,9 +106,37 @@ Open `~/.claude/settings.json` and add (or update) the `statusLine` block:
 }
 ```
 
-Replace `/path/to/claude-usage-monitor` with the actual path where you cloned the repo.
+Replace the example path with the actual path where you cloned the repo.
 
-**3. That's it.** Restart Claude Code and the statusline appears automatically.
+**Path examples**
+
+- Windows: `C:\Users\your-name\path\to\claude-usage-monitor\statusline.cmd`
+- macOS: `/Users/your-name/path/to/claude-usage-monitor/statusline.sh`
+- Linux: `/home/your-name/path/to/claude-usage-monitor/statusline.sh`
+
+**3. Optional sanity check**
+
+Before restarting Claude Code, make sure the launcher runs:
+
+**Windows**
+
+```powershell
+type nul | C:\path\to\claude-usage-monitor\statusline.cmd
+```
+
+**macOS / Linux**
+
+```bash
+printf '' | bash /path/to/claude-usage-monitor/statusline.sh
+```
+
+It should print:
+
+```bash
+Claude
+```
+
+**4. Restart Claude Code.** The statusline appears automatically.
 
 ---
 
@@ -100,12 +145,12 @@ Replace `/path/to/claude-usage-monitor` with the actual path where you cloned th
 1. Claude Code pipes session JSON (model, context window, tokens, cost) to `statusline.sh` via stdin
 2. `statusline.py` parses the session data and reads your OAuth token from `~/.claude/.credentials.json`
 3. Calls the Anthropic usage API (`/api/oauth/usage`) to fetch your current 5h and 7d quota utilization
-4. Caches the API response to `/tmp/claude-sl-usage.json` for 5 minutes to avoid excessive calls
+4. Caches the API response to your system temp directory for 5 minutes to avoid excessive calls
 5. Outputs a two-line ANSI-colored statusline
 
 ### Caching
 
-API responses are cached for **5 minutes** in `/tmp/claude-sl-usage.json`. A file-based lock (`/tmp/claude-sl-usage.lock`) prevents concurrent API calls. The cache is refreshed automatically in the background when stale.
+API responses are cached for **5 minutes** in your system temp directory (`tempfile.gettempdir()` in Python). A file-based lock prevents concurrent API calls. The cache is refreshed automatically in the background when stale.
 
 ### Authentication
 
@@ -118,10 +163,10 @@ The plugin reads your OAuth token from Claude Code's credential store at `~/.cla
 | Platform | Shell | Status |
 |---|---|---|
 | Windows 11 | Git Bash | Tested |
-| macOS | zsh / bash | Should work |
-| Linux | bash / zsh | Should work |
+| macOS | bash / zsh | Supported by launcher, not deeply tested |
+| Linux | bash / zsh | Supported by launcher, not deeply tested |
 
-The script forces UTF-8 output encoding to handle Unicode gauge characters on Windows.
+The launcher resolves `python3`, `python`, and Windows `py -3`, and the script forces UTF-8 output encoding to handle Unicode gauge characters on Windows.
 
 ---
 
@@ -206,7 +251,11 @@ The API hasn't been called yet or the cache is stale. Wait a few seconds — the
 Make sure your terminal supports UTF-8. On Windows, Git Bash works out of the box. If using cmd.exe or PowerShell, run `chcp 65001` first.
 
 **No statusline appears at all**
-Check that `statusLine.command` in `~/.claude/settings.json` points to the correct path and that `bash` is available on your PATH.
+Check that `statusLine.command` in `~/.claude/settings.json` points to the correct path.
+
+- Windows: `statusline.cmd` also requires Git for Windows / Git Bash to be installed in a standard location.
+- macOS / Linux: make sure `bash` plus `python3` or `python` are available on your PATH.
+- Windows: if `python` is weird because of Microsoft Store aliases, the launcher will also try `py -3`.
 
 ---
 
