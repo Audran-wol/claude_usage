@@ -1,6 +1,6 @@
 # claude-usage-monitor
 
-A real-time statusline plugin for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that shows your 5-hour and 7-day quota remaining percentages, context window usage, token counts, and reset countdowns — right in your terminal.
+A real-time statusline plugin for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that shows your 5-hour and 7-day quota usage percentages, context window remaining, token counts, and reset countdowns — right in your terminal. Matches the usage display in Claude Desktop.
 
 Never get surprised by rate limits again.
 
@@ -10,25 +10,25 @@ No extra API key setup. No Python packages to install. It uses your existing Cla
 
 ## Showcase
 
-### Healthy — plenty of quota remaining
+### Healthy — low usage
 
-![Healthy statusline](assets/healthy.png?v=2)
+![Healthy statusline](assets/healthy.png?v=3)
 
 ### Moderate — usage climbing
 
-![Moderate statusline](assets/moderate.png?v=2)
+![Moderate statusline](assets/moderate.png?v=3)
 
 ### Critical — nearly exhausted
 
-![Critical statusline](assets/critical.png?v=2)
+![Critical statusline](assets/critical.png?v=3)
 
 ### Heavy Context — deep in conversation
 
-![Heavy context statusline](assets/heavy-context.png?v=2)
+![Heavy context statusline](assets/heavy-context.png?v=3)
 
 ### Fresh Session — no data yet
 
-![Fresh session statusline](assets/fresh.png?v=2)
+![Fresh session statusline](assets/fresh.png?v=3)
 
 ---
 
@@ -36,7 +36,7 @@ No extra API key setup. No Python packages to install. It uses your existing Cla
 
 ```
 ◆ Opus │ my-project/main
-▰▰▰▰▱ 75% │ ↑50k ↓12k │ 5h: 80% (1h) │ 7d: 34% │ 2m0s
+▰▰▰▰▱ 75% │ ↑50k ↓12k │ 5h: 20% (1h) │ 7d: 66% │ 2m0s
 ```
 
 | Segment | Description |
@@ -45,18 +45,18 @@ No extra API key setup. No Python packages to install. It uses your existing Cla
 | `my-project/main` | Project name + git branch |
 | `▰▰▰▰▱ 75%` | Context window remaining (5-block gauge) |
 | `↑50k ↓12k` | Input/output tokens this session |
-| `5h: 80%` | 5-hour quota remaining % |
+| `5h: 20%` | 5-hour quota used % (matches Claude Desktop) |
 | `(1h)` | Time until 5h window resets |
-| `7d: 34%` | 7-day quota remaining % |
+| `7d: 66%` | 7-day quota used % (matches Claude Desktop) |
 | `2m0s` | Session duration |
 
 ### Color coding
 
 | Color | Meaning |
 |---|---|
-| **Green** | > 30% remaining — you're good |
-| **Yellow** | 10–30% remaining — slow down |
-| **Red** | < 10% remaining — close to rate limit |
+| **Green** | < 70% used — you're good |
+| **Yellow** | 70–90% used — slow down |
+| **Red** | > 90% used — close to rate limit |
 
 ---
 
@@ -168,8 +168,6 @@ The plugin reads your OAuth token from Claude Code's credential store at `~/.cla
 
 The launcher resolves `python3`, `python`, and Windows `py -3`, and the script forces UTF-8 output encoding to handle Unicode gauge characters on Windows.
 
-GitHub Actions now runs smoke tests on Windows, macOS, and Linux for every push.
-
 ---
 
 ## Customization
@@ -232,7 +230,7 @@ Out of the box with zero config, you get:
 
 ```
 ◆ Opus │ my-project/main
-▰▰▰▰▱ 75% │ ↑50k ↓12k │ 5h: 80% (1h) │ 7d: 34% │ 2m0s
+▰▰▰▰▱ 75% │ ↑50k ↓12k │ 5h: 20% (1h) │ 7d: 66% │ 2m0s
 ```
 
 No configuration needed beyond the `statusLine` entry in settings.json. The plugin automatically:

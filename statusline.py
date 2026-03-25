@@ -2,7 +2,7 @@
 """
 Claude Code statusline with 5h/7d quota tracking.
 
-Shows: model, context gauge, tokens, git branch, 5h remaining%, 7d remaining%,
+Shows: model, context gauge, tokens, git branch, 5h used%, 7d used%,
 pace indicator, and reset countdown.
 
 Designed for Claude Code on Windows, macOS, and Linux. Caches API responses to
@@ -163,14 +163,13 @@ def format_reset(minutes):
     return f" {D}({m}m){N}"
 
 
-def remaining_pct_str(used_pct):
-    """Format remaining % with color."""
+def used_pct_str(used_pct):
+    """Format used % with color (matches Claude Desktop display)."""
     if used_pct is None or used_pct == "--":
         return "--"
     used = int(used_pct)
-    remaining = 100 - used
     c = color_pct(used)
-    return f"{c}{remaining}%{N}"
+    return f"{c}{used}%{N}"
 
 
 def pace_indicator(used_pct, remain_min, window_min):
@@ -397,8 +396,8 @@ if usage:
     reset5 = format_reset(r5) if SHOW_RESET else ""
     reset7 = format_reset(r7) if (SHOW_RESET and u7 is not None and int(u7) >= 70) else ""
 
-    line2_parts.append(f"5h: {remaining_pct_str(u5)}{pace5}{reset5}")
-    line2_parts.append(f"7d: {remaining_pct_str(u7)}{pace7}{reset7}")
+    line2_parts.append(f"5h: {used_pct_str(u5)}{pace5}{reset5}")
+    line2_parts.append(f"7d: {used_pct_str(u7)}{pace7}{reset7}")
 
     # Extra usage (only show when 5h is nearly exhausted)
     if usage["extra_enabled"] and u5 is not None and int(u5) >= 80:
