@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-The latest commit on `main` is the supported version.
+The latest tagged release and the current `main` branch are supported.
 
 ## Runtime behavior
 

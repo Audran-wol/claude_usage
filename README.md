@@ -15,13 +15,13 @@ Windows launches Python directly, so there is no Git Bash requirement.
 ### Windows PowerShell
 
 ```powershell
-irm https://raw.githubusercontent.com/aiedwardyi/claude-usage-monitor/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/aiedwardyi/claude-usage-monitor/v0.1.0/install.ps1 | iex
 ```
 
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/aiedwardyi/claude-usage-monitor/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/aiedwardyi/claude-usage-monitor/v0.1.0/install.sh | bash
 ```
 
 ### Prefer to audit first
