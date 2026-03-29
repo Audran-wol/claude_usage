@@ -6,7 +6,6 @@ import subprocess
 import sys
 import tempfile
 
-
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 INSTALL_PY = ROOT / "install.py"
 INSTALL_SH = ROOT / "install.sh"
