@@ -59,7 +59,7 @@ if (Test-Path $localInstaller) {
 $repo = if ($env:CLAUDE_USAGE_MONITOR_REPO) { $env:CLAUDE_USAGE_MONITOR_REPO } else { "Audran-wol/my-claude-monitor" }
 $ref = if ($env:CLAUDE_USAGE_MONITOR_REF) { $env:CLAUDE_USAGE_MONITOR_REF } else { "main" }
 $rawBase = "https://raw.githubusercontent.com/$repo/$ref"
-$tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("claude-usage-monitor-install-" + [System.Guid]::NewGuid().ToString("N"))
+$tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("my-claude-monitor-install-" + [System.Guid]::NewGuid().ToString("N"))
 
 New-Item -ItemType Directory -Path $tempDir | Out-Null
 

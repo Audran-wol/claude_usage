@@ -1,4 +1,4 @@
-# Contributing to claude-usage-monitor
+# Contributing to my-claude-monitor
 
 Thanks for your interest in contributing! Here's how to get started.
 

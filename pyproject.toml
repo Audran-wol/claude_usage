@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "claude-usage-monitor"
+name = "my-claude-monitor"
 version = "0.2.0"
 description = "Claude Code statusline plugin with quota tracking, predictions, notifications, and historical usage logging."
 readme = "README.md"
@@ -28,7 +28,7 @@ classifiers = [
 ]
 
 [project.scripts]
-claude-usage-monitor = "claude_usage_monitor.cli:main"
+my-claude-monitor = "claude_usage_monitor.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/Audran-wol/my-claude-monitor"

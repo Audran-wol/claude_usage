@@ -92,7 +92,7 @@ def _color_val(pct) -> str:
 def main() -> int:
     """CLI entry point."""
     parser = argparse.ArgumentParser(
-        prog="claude-usage-monitor",
+        prog="my-claude-monitor",
         description="Claude Code usage monitor with historical tracking.",
     )
     parser.add_argument(

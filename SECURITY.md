@@ -6,7 +6,7 @@ The latest tagged release and the current `main` branch are supported.
 
 ## Runtime behavior
 
-At runtime, `claude-usage-monitor` does the following:
+At runtime, `my-claude-monitor` does the following:
 
 - Reads session JSON from Claude Code on `stdin`
 - Reads `~/.claude/.credentials.json` only to access `claudeAiOauth.accessToken`, unless `CLAUDE_CODE_OAUTH_TOKEN` is already set
@@ -19,7 +19,7 @@ It does not install dependencies, ship analytics, or send repository contents, p
 
 ## Installer behavior
 
-The installers copy these files into `~/.claude/plugins/claude-usage-monitor`:
+The installers copy these files into `~/.claude/plugins/my-claude-monitor`:
 
 - `statusline.py`
 - `statusline.sh`

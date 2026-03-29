@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-DEFAULT_DB_DIR = Path.home() / ".claude" / "plugins" / "claude-usage-monitor"
+DEFAULT_DB_DIR = Path.home() / ".claude" / "plugins" / "my-claude-monitor"
 DEFAULT_DB_PATH = DEFAULT_DB_DIR / "usage_history.db"
 
 SCHEMA_VERSION = 1

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install claude-usage-monitor into the local Claude Code config."""
+"""Install my-claude-monitor into the local Claude Code config."""
 
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ RUNTIME_DIRS = ("src",)
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Install claude-usage-monitor into ~/.claude and update settings.json."
+        description="Install my-claude-monitor into ~/.claude and update settings.json."
     )
     parser.add_argument(
         "--source-dir",
@@ -31,7 +31,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--install-dir",
         type=Path,
-        default=Path.home() / ".claude" / "plugins" / "claude-usage-monitor",
+        default=Path.home() / ".claude" / "plugins" / "my-claude-monitor",
         help="Where to copy the runtime files.",
     )
     parser.add_argument(
@@ -180,7 +180,7 @@ def main() -> int:
     if not args.skip_verify:
         verify_ok, verify_detail = verify_install(install_dir)
 
-    print("Installed claude-usage-monitor")
+    print("Installed my-claude-monitor")
     print(f"Install dir: {install_dir}")
     print(f"Settings file: {settings_path}")
     print(f"Status line command: {command}")
