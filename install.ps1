@@ -48,16 +48,19 @@ function Install-ClaudeMonitor {
     }
 
     $python = Find-Python
-    $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-    $localInstaller = Join-Path $scriptDir "install.py"
     $installerArgs = Get-InstallerArgs
 
-    if (Test-Path $localInstaller) {
-        Invoke-Python -Python $python -ScriptPath $localInstaller -ScriptArgs $installerArgs
-        exit $LASTEXITCODE
+    # When run as a local file, prefer the adjacent install.py
+    $scriptPath = $MyInvocation.MyCommand.Path
+    if ($scriptPath) {
+        $localInstaller = Join-Path (Split-Path -Parent $scriptPath) "install.py"
+        if (Test-Path $localInstaller) {
+            Invoke-Python -Python $python -ScriptPath $localInstaller -ScriptArgs $installerArgs
+            exit $LASTEXITCODE
+        }
     }
 
-    $repo = if ($env:CLAUDE_USAGE_MONITOR_REPO) { $env:CLAUDE_USAGE_MONITOR_REPO } else { "Audran-wol/my-claude-monitor" }
+    $repo = if ($env:CLAUDE_USAGE_MONITOR_REPO) { $env:CLAUDE_USAGE_MONITOR_REPO } else { "Audran-wol/claude_usage" }
     $ref = if ($env:CLAUDE_USAGE_MONITOR_REF) { $env:CLAUDE_USAGE_MONITOR_REF } else { "main" }
     $rawBase = "https://raw.githubusercontent.com/$repo/$ref"
     $tempDir = Join-Path ([System.IO.Path]::GetTempPath()) ("my-claude-monitor-install-" + [System.Guid]::NewGuid().ToString("N"))
