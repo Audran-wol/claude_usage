@@ -25,12 +25,8 @@ No API keys. No dependencies. No telemetry. Reads your existing Claude Code sess
 
 **PowerShell:**
 ```powershell
-irm https://raw.githubusercontent.com/Audran-wol/claude_usage/main/install.ps1 | iex
+& ([scriptblock]::Create((irm https://raw.githubusercontent.com/Audran-wol/claude_usage/main/install.ps1)))
 ```
-> If that doesn't work (older PowerShell), use:
-> ```powershell
-> & ([scriptblock]::Create((irm https://raw.githubusercontent.com/Audran-wol/claude_usage/main/install.ps1)))
-> ```
 
 **macOS / Linux:**
 ```bash
