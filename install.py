@@ -15,6 +15,7 @@ from pathlib import Path
 
 
 RUNTIME_FILES = ("statusline.py", "statusline.sh", "statusline.cmd")
+RUNTIME_DIRS = ("src",)
 
 
 def parse_args() -> argparse.Namespace:
@@ -70,6 +71,15 @@ def copy_runtime_files(source_dir: Path, install_dir: Path) -> list[Path]:
             current_mode = dst.stat().st_mode
             dst.chmod(current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         copied.append(dst)
+    # Copy src/ package directory
+    for dirname in RUNTIME_DIRS:
+        src_dir = (source_dir / dirname).resolve()
+        dst_dir = install_dir / dirname
+        if src_dir.is_dir() and src_dir != dst_dir.resolve():
+            if dst_dir.exists():
+                shutil.rmtree(dst_dir)
+            shutil.copytree(src_dir, dst_dir)
+            copied.append(dst_dir)
     return copied
 
 

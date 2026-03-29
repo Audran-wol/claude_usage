@@ -22,15 +22,20 @@ def run(command, stdin_text=""):
     env["CQB_RESET"] = "0"
     env["CQB_DURATION"] = "0"
     env["CQB_BRANCH"] = "0"
+    env["CQB_TRACK"] = "0"
+    env["CQB_NOTIFY"] = "0"
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONUTF8"] = "1"
     env.pop("CLAUDE_CODE_OAUTH_TOKEN", None)
     proc = subprocess.run(
         command,
         input=stdin_text,
-        text=True,
         capture_output=True,
         cwd=ROOT,
         env=env,
         timeout=20,
+        encoding="utf-8",
+        errors="replace",
     )
     return proc
 
@@ -62,7 +67,11 @@ def smoke_statusline_py():
     proc = run([sys.executable, str(STATUSLINE_PY)], json.dumps(payload))
     assert_ok(proc, "statusline.py")
     assert_contains(proc.stdout, "Opus", "statusline.py")
-    assert_contains(proc.stdout, "75%", "statusline.py")
+    # Gauge renders filled/empty blocks — check for block chars (█ and ░)
+    has_gauge = ("\u2588" in proc.stdout or "\u2591" in proc.stdout
+                 or "█" in proc.stdout or "░" in proc.stdout)
+    if not has_gauge:
+        raise AssertionError(f"statusline.py missing gauge blocks\noutput:\n{proc.stdout}")
 
 
 def smoke_empty_stdin():
@@ -142,6 +151,10 @@ def smoke_installer():
             if not (install_dir / filename).exists():
                 raise AssertionError(f"install.py did not copy {filename}")
 
+        # Check that src/ package was copied
+        if not (install_dir / "src" / "claude_usage_monitor" / "__init__.py").exists():
+            raise AssertionError("install.py did not copy src/ package")
+
         settings = json.loads(settings_path.read_text(encoding="utf-8"))
         if settings.get("theme") != "dark":
             raise AssertionError("install.py did not preserve existing settings")
@@ -154,6 +167,67 @@ def smoke_installer():
         backup_path = settings_path.with_suffix(".json.bak")
         if not backup_path.exists():
             raise AssertionError("install.py did not create a settings backup")
+
+
+def smoke_tracker():
+    """Test the SQLite tracker module."""
+    sys.path.insert(0, str(ROOT / "src"))
+    from claude_usage_monitor.data.tracker import UsageTracker
+
+    with tempfile.TemporaryDirectory() as tmp:
+        db_path = pathlib.Path(tmp) / "test.db"
+        tracker = UsageTracker(db_path)
+
+        tracker.log_snapshot(
+            model="Opus",
+            input_tokens=5000,
+            output_tokens=2000,
+            cost_usd=0.15,
+            five_hour_pct=42.0,
+            seven_day_pct=12.0,
+            session_duration_ms=300000,
+            project_name="test-project",
+            project_dir="/tmp/test",
+        )
+
+        stats = tracker.get_session_stats(7)
+        if stats.get("total_snapshots", 0) != 1:
+            raise AssertionError(f"expected 1 snapshot, got {stats}")
+
+        daily = tracker.get_daily_summary(7)
+        if len(daily) != 1:
+            raise AssertionError(f"expected 1 daily entry, got {len(daily)}")
+
+        snapshots = tracker.get_all_snapshots_json(7)
+        if len(snapshots) != 1:
+            raise AssertionError(f"expected 1 snapshot in JSON, got {len(snapshots)}")
+        if snapshots[0]["model"] != "Opus":
+            raise AssertionError(f"unexpected model: {snapshots[0]['model']}")
+
+        tracker.close()
+
+
+def smoke_predictions():
+    """Test prediction functions."""
+    sys.path.insert(0, str(ROOT / "src"))
+    from claude_usage_monitor.predictions import (
+        estimate_messages_remaining,
+        estimate_time_to_empty,
+        estimate_decay_time,
+    )
+
+    msgs = estimate_messages_remaining(50.0, 10000, 5000, 600000)
+    if msgs is None or msgs <= 0:
+        raise AssertionError(f"expected positive messages remaining, got {msgs}")
+
+    tte = estimate_time_to_empty(50.0, 600000)
+    if tte is None or tte <= 0:
+        raise AssertionError(f"expected positive time to empty, got {tte}")
+
+    # Decay with no input
+    decay = estimate_decay_time(None)
+    if decay is not None:
+        raise AssertionError(f"expected None for no input, got {decay}")
 
 
 def smoke_unix_install_wrapper():
@@ -221,12 +295,31 @@ def smoke_windows_install_wrapper():
             raise AssertionError(f"unexpected install.ps1 command: {command}")
 
 
+def smoke_cli_stats():
+    """Test --stats with empty database."""
+    env = os.environ.copy()
+    env["CQB_TRACK"] = "0"
+    proc = subprocess.run(
+        [sys.executable, str(STATUSLINE_PY), "--stats", "--days", "1"],
+        text=True,
+        capture_output=True,
+        cwd=ROOT,
+        env=env,
+        timeout=20,
+    )
+    assert_ok(proc, "--stats")
+    assert_contains(proc.stdout, "Statistics", "--stats output")
+
+
 def main():
     smoke_statusline_py()
     smoke_empty_stdin()
     smoke_unix_launcher()
     smoke_windows_launcher()
+    smoke_predictions()
+    smoke_tracker()
     smoke_installer()
+    smoke_cli_stats()
     smoke_unix_install_wrapper()
     smoke_windows_install_wrapper()
     print("smoke tests passed")

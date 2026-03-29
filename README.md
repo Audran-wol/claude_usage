@@ -1,242 +1,220 @@
-<h1 align="center">claude-usage-monitor</h1>
+# my-claude-monitor
+
+Real-time Claude Code usage monitor — see your quota burn in the terminal.
+
+A statusline plugin for [Claude Code](https://docs.anthropic.com/en/docs/claude-code) that shows your 5-hour and 7-day quota usage, context window consumption, token counts, burn rate predictions, and desktop notifications — all directly in your terminal. No API keys, no dependencies, no telemetry. Runs entirely on your machine using only the Python standard library.
+
+## How it looks
+
+The usage bar fills up as you consume context. Color shifts from teal to orange to magenta as usage climbs.
+
+**Healthy session** — barely started, plenty of room:
+```
+███░░░░░░░░░░░  ·  5h 14% (4h)  ·  7d 30%  ·  ▸ Opus my-project/main
+↑25k ↓8k  ·  10m0s
+```
+
+**Moderate session** — past the halfway mark:
+```
+████████░░░░░░  ·  5h 55% (2h)  ·  7d 60%  ·  ▸ Opus my-project/main
+↑80k ↓25k  ·  25m0s
+```
+
+**Critical session** — approaching the limit:
+```
+████████████░░  ·  5h 92% (45m)  ·  7d 78%  ·  ▸ Opus my-project/main
+↑160k ↓48k  ·  ~8msg left  ·  empty in 12m  ·  drops in 45m  ·  $2.10  ·  50m0s
+```
 
 <p align="center">
-  <a href="https://github.com/aiedwardyi/claude-usage-monitor/actions/workflows/smoke-tests.yml"><img src="https://github.com/aiedwardyi/claude-usage-monitor/actions/workflows/smoke-tests.yml/badge.svg" alt="Smoke Tests"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License"></a>
+  <img src="./assets/demo-animated.gif" alt="my-claude-monitor demo">
 </p>
 
-<p align="center">
-  Claude Code statusline plugin that shows your quota usage, context, tokens, and reset countdowns directly in the terminal.
-  <br>
-  No API keys. No telemetry. No dependencies. Runs locally.
-</p>
+## Install
 
-<p align="center">
-  <img src="./assets/demo-animated.gif" alt="claude-usage-monitor demo">
-  <br>
-  <sub>Real-time usage tracking - green to yellow to red as your session progresses.</sub>
-</p>
-
-## Quickstart
-
-### Windows PowerShell
-
+**Windows (PowerShell):**
 ```powershell
-irm https://raw.githubusercontent.com/aiedwardyi/claude-usage-monitor/v0.1.0/install.ps1 | iex
+irm https://raw.githubusercontent.com/Audran-wol/my-claude-monitor/main/install.ps1 | iex
 ```
 
-### macOS / Linux
-
+**macOS / Linux:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/aiedwardyi/claude-usage-monitor/v0.1.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/Audran-wol/my-claude-monitor/main/install.sh | bash
 ```
 
-### What you get
-
-After install, restart Claude Code. Your statusline now shows:
-
-```text
-◆ Opus │ my-project/main
-▰▰▰▰▱ 75% │ ↑50k ↓12k │ 5h: 20% (1h) │ 7d: 66% │ 2m0s
-```
-
-- **5h / 7d quota** - know exactly how much you've used
-- **Context %** - see when you're running low before Claude tells you
-- **Token counts** - input and output for the current session
-- **Reset countdown** - know when your quota replenishes
-
-Uses your existing Claude Code OAuth session. No extra API key or Python packages needed. Windows launches Python directly - no Git Bash requirement.
-
-### Prefer to audit first
-
+**Manual install:**
 ```bash
-git clone https://github.com/aiedwardyi/claude-usage-monitor.git
-cd claude-usage-monitor
-git switch --detach v0.1.0
+git clone https://github.com/Audran-wol/my-claude-monitor.git
+cd my-claude-monitor
 python install.py
 ```
 
-On Windows, `py -3 install.py` works too.
-
-The installer:
-
-- copies launcher files into `~/.claude/plugins/claude-usage-monitor`
-- updates `~/.claude/settings.json` (backs up to `settings.json.bak` first)
-- runs a launcher smoke check and prints the verify command
-
-### Verify manually
-
-If you want to verify the launcher yourself before restarting Claude Code:
-
-- Windows: `type nul | "C:\Users\you\.claude\plugins\claude-usage-monitor\statusline.cmd"`
-- macOS / Linux: `printf '' | bash ~/.claude/plugins/claude-usage-monitor/statusline.sh`
+The installer copies files to `~/.claude/plugins/claude-usage-monitor/`, updates `~/.claude/settings.json` to register the statusline, and verifies the launcher works. Restart Claude Code after installing.
 
 ## What it shows
 
-| Segment | Description |
-|---|---|
-| `◆ Opus` | Active model |
-| `my-project/main` | Project name and git branch |
-| `▰▰▰▰▱ 75%` | Context window remaining |
-| `↑50k ↓12k` | Input and output tokens |
-| `5h: 20%` | 5-hour quota used |
-| `(1h)` | Time until 5-hour window resets |
-| `7d: 66%` | 7-day quota used |
-| `2m0s` | Session duration |
+| Segment | Example | Description |
+|---|---|---|
+| Usage bar | `████████░░░░░░` | Context window consumed — filled = used, empty = remaining |
+| 5h quota | `5h 42% (2h)` | 5-hour rolling window usage with reset countdown |
+| 7d quota | `7d 58%` | 7-day rolling window usage |
+| Model | `▸ Opus` | Active Claude model |
+| Branch | `my-project/main` | Project name and git branch |
+| Tokens | `↑95k ↓30k` | Input and output tokens this session |
+| Messages left | `~120msg left` | Estimated messages remaining at current burn rate |
+| Time to empty | `empty in 1h0m` | Projected time until quota runs out |
+| Decay | `drops in 45m` | When 5h rolling window usage starts dropping |
+| Cost | `$1.85` | Session cost in USD |
+| Duration | `30m0s` | Session duration |
+| Pace | `-19%` | Ahead/behind expected usage rate |
 
 ### Color coding
 
-| Color | Meaning |
-|---|---|
-| Green | Under 70% used |
-| Yellow | 70-90% used |
-| Red | Over 90% used |
-
-## Trust and security
-
-At runtime, the tool:
-
-- reads Claude Code session JSON from `stdin`
-- reads `~/.claude/.credentials.json` for `claudeAiOauth.accessToken` (unless `CLAUDE_CODE_OAUTH_TOKEN` is set)
-- runs `git rev-parse --abbrev-ref HEAD` for the branch name
-- writes `claude-sl-usage.json` and `claude-sl-usage.lock` in your system temp directory
-- makes one HTTPS request to `https://api.anthropic.com/api/oauth/usage`
-
-It does **not** install dependencies, collect telemetry, or send any local data besides the usage API call.
-
-The installer writes only to:
-
-- `~/.claude/plugins/claude-usage-monitor/`
-- `~/.claude/settings.json` (with `.bak` backup)
-
-More detail in [SECURITY.md](SECURITY.md).
-
-## Requirements
-
-- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) with an active subscription
-- Python 3.10+ (`python3`, `python`, or `py -3`)
-- macOS / Linux: `bash`
-- Windows: no Git Bash requirement
-
-## How it works
-
-1. Claude Code pipes session JSON into the launcher on every refresh.
-2. `statusline.py` parses the payload and reads your Claude Code OAuth token.
-3. It calls Anthropic's usage endpoint to fetch 5-hour and 7-day utilization.
-4. Results are cached in your system temp directory for 5 minutes.
-5. The script prints a two-line ANSI statusline.
-
-The first render may show `5h: --` and `7d: --` until the background fetch completes.
-
-## Compatibility
-
-| Platform | Launcher | Status |
+| Color | Meaning | When |
 |---|---|---|
-| Windows 11 | `statusline.cmd` | Tested |
-| macOS | `statusline.sh` | Tested in CI |
-| Linux | `statusline.sh` | Tested in CI |
+| Teal | Good | Under 50% (bar), under 70% (quota) |
+| Orange | Warming up | 50–75% (bar), 70–90% (quota) |
+| Magenta | Critical | Over 75% (bar), over 90% (quota) |
 
-## Customization
+### Error states
 
-Every segment is toggleable via environment variables. Set them in your shell profile or in `~/.claude/settings.json`:
+When something goes wrong, the statusline shows what happened instead of a blank `--`:
+
+| State | Meaning |
+|---|---|
+| `auth expired` | OAuth token invalid — re-authenticate Claude Code |
+| `offline` | Cannot reach the Anthropic API |
+| `rate limited` | Too many requests — retries automatically |
+| `api error` | Unexpected API response |
+
+## Configuration
+
+Control every segment with environment variables. Set them in your shell profile or in `~/.claude/settings.json`:
 
 ```json
 {
   "env": {
-    "CQB_PACE": "1",
-    "CQB_CONTEXT_SIZE": "1",
-    "CQB_COST": "1"
+    "CQB_MSGS_LEFT": "1",
+    "CQB_TIME_EMPTY": "1",
+    "CQB_DECAY": "1",
+    "CQB_COST": "1",
+    "CQB_TRACK": "1"
   }
 }
 ```
+
+### Display
 
 | Variable | Default | Description |
 |---|---|---|
-| `CQB_TOKENS` | `1` | Show token counts |
+| `CQB_TOKENS` | `1` | Show token counts (↑in ↓out) |
 | `CQB_RESET` | `1` | Show reset countdowns |
 | `CQB_DURATION` | `1` | Show session duration |
 | `CQB_BRANCH` | `1` | Show git branch |
-| `CQB_CONTEXT_SIZE` | `0` | Show context size label such as `of 1M` |
-| `CQB_PACE` | `0` | Show pacing indicator |
-| `CQB_COST` | `0` | Show session cost |
-| `CQB_REMAINING` | `0` | Show remaining % instead of used % for quotas |
+| `CQB_COST` | `0` | Show session cost in USD |
+| `CQB_CONTEXT_SIZE` | `0` | Show context window size (e.g., "of 200K") |
+| `CQB_PACE` | `0` | Show pace indicator (+/-% vs expected rate) |
+| `CQB_REMAINING` | `0` | Show remaining% instead of used% for quotas |
 
-### Presets
+### Predictions
 
-**Maximal**
+| Variable | Default | Description |
+|---|---|---|
+| `CQB_MSGS_LEFT` | `0` | Estimate messages remaining based on token burn rate |
+| `CQB_TIME_EMPTY` | `0` | Project time until quota is exhausted |
+| `CQB_DECAY` | `0` | Show when 5h rolling window usage will start dropping |
 
-![Maximal statusline](assets/maximal.png)
+### Notifications
 
-```json
-{ "env": { "CQB_PACE": "1", "CQB_CONTEXT_SIZE": "1", "CQB_COST": "1" } }
-```
+| Variable | Default | Description |
+|---|---|---|
+| `CQB_NOTIFY` | `0` | Enable desktop notifications at quota thresholds |
+| `CQB_NOTIFY_THRESHOLDS` | `80,90,95` | Comma-separated % thresholds to alert at |
 
-**Minimal**
+Notifications use platform-native methods: Windows toast, macOS osascript, Linux notify-send. Each threshold fires once per 5-hour window.
 
-![Minimal statusline](assets/minimal.png)
+### Historical tracking
 
-```json
-{ "env": { "CQB_TOKENS": "0", "CQB_RESET": "0", "CQB_DURATION": "0" } }
-```
+| Variable | Default | Description |
+|---|---|---|
+| `CQB_TRACK` | `0` | Log usage snapshots to local SQLite database |
 
-**Heavy context**
+When enabled, every statusline refresh logs a snapshot to `~/.claude/plugins/claude-usage-monitor/usage_history.db` — timestamp, model, tokens in/out, cost, quota percentages, session duration, and project name.
 
-![Heavy context statusline](assets/heavy-context.png)
+## CLI commands
 
-**Critical usage**
-
-![Critical statusline](assets/critical.png)
-
-## Manual install
+### Usage statistics
 
 ```bash
-git clone https://github.com/aiedwardyi/claude-usage-monitor.git
-cd claude-usage-monitor
-git switch --detach v0.1.0
-python install.py
+python statusline.py --stats           # Last 30 days
+python statusline.py --stats --days 7  # Last 7 days
 ```
 
-On Windows, `py -3 install.py` works too.
+Shows active days, peak usage, top projects by cost, and daily breakdown.
 
-Or update `~/.claude/settings.json` yourself:
+### JSON export
 
-```json
-{
-  "statusLine": {
-    "type": "command",
-    "command": "bash /path/to/statusline.sh",
-    "padding": 0
-  }
-}
+```bash
+python statusline.py --json                              # Last 30 days
+python statusline.py --json --days 7                     # Last 7 days
+python statusline.py --json | jq '.[] | select(.five_hour_pct > 80)'  # Filter
 ```
 
-On Windows, use the absolute path to `statusline.cmd` instead.
+Raw snapshots as JSON for piping to other tools.
+
+## Project structure
+
+```
+my-claude-monitor/
+├── src/claude_usage_monitor/
+│   ├── __init__.py          # Package version
+│   ├── __main__.py          # python -m entry point
+│   ├── cli.py               # --stats, --json commands
+│   ├── colors.py            # 256-color ANSI scheme
+│   ├── formatting.py        # Number/time formatting
+│   ├── notifications.py     # Desktop notification system
+│   ├── oauth.py             # OAuth token retrieval
+│   ├── predictions.py       # Messages remaining, time to empty, decay
+│   ├── quota.py             # API fetch with caching and error states
+│   ├── statusline.py        # Main statusline renderer
+│   └── data/
+│       ├── __init__.py
+│       └── tracker.py       # SQLite historical tracker
+├── statusline.py            # Root launcher
+├── statusline.sh            # Bash launcher
+├── statusline.cmd           # Windows launcher
+├── install.py               # Cross-platform installer
+├── install.sh / install.ps1 # Install wrappers
+├── pyproject.toml           # Package config
+└── tests/smoke_test.py      # Tests
+```
+
+## Security and trust
+
+**Reads:**
+- Session JSON from Claude Code via `stdin`
+- `~/.claude/.credentials.json` for the OAuth token (or `CLAUDE_CODE_OAUTH_TOKEN` env var)
+- `git rev-parse --abbrev-ref HEAD` for the branch name
+
+**Writes:**
+- `claude-sl-usage.json` and `claude-sl-usage.lock` in your system temp directory (cache)
+- `~/.claude/plugins/claude-usage-monitor/usage_history.db` (only if `CQB_TRACK=1`)
+
+**Network:**
+- One HTTPS call to `https://api.anthropic.com/api/oauth/usage`, cached for 5 minutes
+
+No telemetry. No analytics. No data leaves your machine except the single quota API call to Anthropic.
 
 ## Uninstall
 
-1. Remove `~/.claude/plugins/claude-usage-monitor/`
-2. Edit `~/.claude/settings.json` and remove the `statusLine` entry (restore `.bak` if needed)
+1. Delete `~/.claude/plugins/claude-usage-monitor/`
+2. Remove the `statusLine` entry from `~/.claude/settings.json` (restore `.bak` if needed)
 3. Restart Claude Code
 
-## Troubleshooting
+## Requirements
 
-**The launcher check fails**
-Make sure `python3`, `python`, or `py -3` works from your shell.
-
-**The statusline shows `5h: -- | 7d: --`**
-The first API call runs in the background. Wait a few seconds and let Claude Code refresh.
-
-**Unicode characters look wrong**
-Use a UTF-8 terminal font. On older Windows terminals, run `chcp 65001`.
-
-**I want to inspect the network behavior**
-Read [statusline.py](statusline.py) and [SECURITY.md](SECURITY.md). The only network call is to `https://api.anthropic.com/api/oauth/usage`.
-
-## Contributing
-
-Issues and pull requests are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md).
-
-If this is useful to you, a star helps others find it.
+- [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code) with an active subscription
+- Python 3.10+
 
 ## License
 

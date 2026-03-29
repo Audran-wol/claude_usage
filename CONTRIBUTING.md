@@ -4,7 +4,7 @@ Thanks for your interest in contributing! Here's how to get started.
 
 ## Reporting issues
 
-- Search [existing issues](https://github.com/aiedwardyi/claude-usage-monitor/issues) before opening a new one
+- Search [existing issues](https://github.com/Audran-wol/my-claude-monitor/issues) before opening a new one
 - Include your OS, Python version, and launcher environment (PowerShell, cmd, bash, zsh)
 - Paste the error output or a screenshot of the broken statusline
 
